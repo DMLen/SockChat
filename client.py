@@ -1,12 +1,17 @@
 from message import Message
+from command import Command
+from pingtimer import PingTimer
 import pickle
 import socket
 import threading
+import time
 
 def displaybanner():
     print("SockChat == CLIENT")
 
-def handleCommand(input):
+pinger = PingTimer()
+
+def handleCommand(input): #handle commands entered by user, and if neccessary, send them to the server
     command = input.replace("#", "")
 
     if command == "exit":
@@ -15,13 +20,30 @@ def handleCommand(input):
 
     elif command == "help":
         print(helpmsg)
+
+    elif command == "ping":
+        cmd = Command(idcounter, username, "ping")
+        pinger.start()
+        clientsocket.send(cmd.serialize())
     
     else:
         print("Unknown command! Enter \"#help\" to see a list of commands!")
 
+def handleResponse(input): #handle command responses from the server
+    command = input.replace("#", "")
+
+    if command == "pong":
+        pinger.stop()
+        print("Pong! Response received from server!")
+        print(f"Elapsed time: {pinger.get()} seconds")
+
+
+
+
 helpmsg = """Commands:
 #help - Displays this message
-#exit - Exits the program"""
+#exit - Exits the program
+#ping - Pings the server"""
 
 def handleMessage(): #also handle receiving messages from the server
     while True:
@@ -29,7 +51,11 @@ def handleMessage(): #also handle receiving messages from the server
         if not data:
             break
         msg = pickle.loads(data)
-        print(f"> {msg}")
+
+        if msg.cmd == True: #if the input data is a special response from the server, handle it appropriately
+            handleResponse(msg.content)
+        else:
+            print(f"> {msg}")
 
 ### EXECUTION
 

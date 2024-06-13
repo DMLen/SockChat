@@ -1,4 +1,5 @@
 from message import Message
+from command import Command
 import pickle
 import socket
 import threading
@@ -27,15 +28,28 @@ def handleClient(clientsocket):
                 break
             else:
                 msg = pickle.loads(data)
-                print(f"{addr} {msg}") #deserialize message and print it
-                for client in clientlst: #broadcast received message to all current client sockets
-                    client.sendall(data)
+                if msg.cmd == True:
+                    handleUserCommand(msg.content, clientsocket) #handle user commands on the serverside
+                else:
+                    print(f"> {addr} {msg}") #deserialize message and print it
+                    for client in clientlst: #broadcast received message to all current client sockets
+                        client.sendall(data)
     except (BrokenPipeError, ConnectionResetError):
         print(f"Connection closed: {addr}")
 
     finally:
         clientlst.remove(clientsocket)
         clientsocket.close()
+
+def handleUserCommand(input, clientsocket): #handle commands received from clients
+    command = input.replace("#", "")
+
+    if command == "ping":
+        cmd = Command(0, "server", "pong")
+        clientsocket.send(cmd.serialize())
+    
+    else:
+        print(f"Unknown command received from {clientsocket}! This should never be displayed!")
 
 ### EXECUTION
 
