@@ -14,7 +14,7 @@ port = 5000
 def displaybanner():
     banner = f"""   SockChat == SERVER
 Running on host: {host}
-Running on port: {port}"""
+Running on port: {port}\n"""
     print(banner)
 
 
@@ -42,11 +42,21 @@ def handleClient(clientsocket):
         clientsocket.close()
 
 def handleUserCommand(input, clientsocket): #handle commands received from clients
-    command = input.replace("#", "")
+    parts = input.replace("#", "").split(' ', 1)  # split input into command and arguments
+    command = parts[0]
+    args = parts[1] if len(parts) > 1 else None  # if there are arguments, assign them to args
 
     if command == "ping":
         cmd = Command(0, "server", "pong")
         clientsocket.send(cmd.serialize())
+
+    elif command == "notifynamechange": #notify all other users of namechange
+        oldname, newname = args.split(' ', 1)
+        print(f"User {oldname} has changed their name to {newname}!")
+
+        msg = Message(0, "server", f"{oldname} has changed their username to {newname}")
+        for client in clientlst:
+            client.send(msg.serialize())
     
     else:
         print(f"Unknown command received from {clientsocket}! This should never be displayed!")

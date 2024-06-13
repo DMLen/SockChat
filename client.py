@@ -7,12 +7,18 @@ import threading
 import time
 
 def displaybanner():
-    print("SockChat == CLIENT")
+    print("SockChat == CLIENT\n")
 
 pinger = PingTimer()
 
+def changeUsername(new_username):
+    global username
+    username = new_username
+
 def handleCommand(input): #handle commands entered by user, and if neccessary, send them to the server
-    command = input.replace("#", "")
+    parts = input.replace("#", "").split(' ', 1)  # split input into command and arguments
+    command = parts[0]
+    args = parts[1] if len(parts) > 1 else None  # if there are arguments, assign them to args
 
     if command == "exit":
         clientsocket.close()
@@ -25,6 +31,15 @@ def handleCommand(input): #handle commands entered by user, and if neccessary, s
         cmd = Command(idcounter, username, "ping")
         pinger.start()
         clientsocket.send(cmd.serialize())
+
+    elif command == "changename":
+        if args is not None:
+            oldname = username
+            changeUsername(args)
+            cmd = Command(idcounter, username, f"notifynamechange {oldname} {args}")
+            clientsocket.send(cmd.serialize())
+        else:
+            print("Please provide a new username.")
     
     else:
         print("Unknown command! Enter \"#help\" to see a list of commands!")
@@ -43,7 +58,8 @@ def handleResponse(input): #handle command responses from the server
 helpmsg = """Commands:
 #help - Displays this message
 #exit - Exits the program
-#ping - Pings the server"""
+#ping - Pings the server
+#changename <name> - Changes your username (Will be broadcast to all users)"""
 
 def handleMessage(): #also handle receiving messages from the server
     while True:
@@ -59,9 +75,19 @@ def handleMessage(): #also handle receiving messages from the server
 
 ### EXECUTION
 
-username = input("Enter your username: ")
+displaybanner()
+
+while True:
+    username = input("Enter your username: ")
+    username = username.strip()
+    if username in ["server", ""]:
+        print("Invalid username!")
+    else:
+        break
+
 host = input("Enter host address (IPv4): ")
 port = int(input("Enter port number: "))
+print("\n")
 
 clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 clientsocket.connect((host, port))
