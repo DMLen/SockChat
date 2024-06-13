@@ -6,7 +6,8 @@ class Message():
         self.id = id
         self.sender = sender
         self.content = content
-        self.timestamp = datetime.now() 
+        self.timestamp = datetime.now()
+        self.cmd = False 
 
     def __str__(self):
         return f"[{self.timestamp.strftime("%d/%m/%Y %H:%M:%S")}] {self.sender}: {self.content}"
