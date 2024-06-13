@@ -28,7 +28,8 @@ def handleMessage(): #also handle receiving messages from the server
         data = clientsocket.recv(1024)
         if not data:
             break
-        print(pickle.loads(data))
+        msg = pickle.loads(data)
+        print(f"> {msg}")
 
 ### EXECUTION
 
@@ -44,7 +45,7 @@ receive_thread = threading.Thread(target=handleMessage)
 receive_thread.start()
 
 while True:
-    content = input("> ")
+    content = input("")
     if content.startswith(("#")):
         handleCommand(content)
     else:

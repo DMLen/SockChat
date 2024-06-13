@@ -11,7 +11,11 @@ port = 5000
 ### END CONFIG ###
 
 def displaybanner():
-    print("SockChat == SERVER")
+    banner = f"""   SockChat == SERVER
+Running on host: {host}
+Running on port: {port}"""
+    print(banner)
+
 
 clientlst = [] #list of current client sockets for broadcasting
 
@@ -22,7 +26,8 @@ def handleClient(clientsocket):
             if not data:
                 break
             else:
-                print(pickle.loads(data)) #deserialize message and print it
+                msg = pickle.loads(data)
+                print(f"{addr} {msg}") #deserialize message and print it
                 for client in clientlst: #broadcast received message to all current client sockets
                     client.sendall(data)
     except (BrokenPipeError, ConnectionResetError):
