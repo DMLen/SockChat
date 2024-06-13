@@ -7,7 +7,11 @@ import threading
 ### CONFIG VARIABLES ###
 
 host = 'localhost'
-port = 5000      
+port = 5000   
+
+#portforwarding note: for port forwarding, the host ip should be the ip of the device running this code.
+#make sure you have a port forwarding rule set up on the router to forward the port to this device!
+#to connect, clients will have to input the PUBLIC IP of your router!
 
 ### END CONFIG ###
 
