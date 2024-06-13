@@ -33,13 +33,14 @@ def handleCommand(input): #handle commands entered by user, and if neccessary, s
         clientsocket.send(cmd.serialize())
 
     elif command == "changename":
-        if args is not None:
+        args = args.strip()
+        if args is not None and args not in ["server", ""]:
             oldname = username
             changeUsername(args)
             cmd = Command(idcounter, username, f"notifynamechange {oldname} {args}")
             clientsocket.send(cmd.serialize())
         else:
-            print("Please provide a new username.")
+            print("Please provide a valid username.")
     
     else:
         print("Unknown command! Enter \"#help\" to see a list of commands!")
