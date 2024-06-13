@@ -51,7 +51,7 @@ def handleResponse(input): #handle command responses from the server
     if command == "pong":
         pinger.stop()
         print("Pong! Response received from server!")
-        print(f"Elapsed time: {pinger.get()} seconds")
+        print(f"Elapsed time: {pinger.get()} ms")
 
 
 
@@ -96,6 +96,8 @@ idcounter = 0
 
 receive_thread = threading.Thread(target=handleMessage)
 receive_thread.start()
+
+print("Commands can be viewed by entering \"#help\"!\n")
 
 while True:
     content = input("")

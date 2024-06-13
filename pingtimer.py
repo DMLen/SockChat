@@ -12,5 +12,6 @@ class PingTimer():
         self.t2 = time.time()
 
     def get(self):
-        return self.t2-self.t1
+        timeDiff = self.t2-self.t1
+        return int(round(timeDiff * 1000))
     
