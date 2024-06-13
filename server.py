@@ -13,14 +13,24 @@ port = 5000
 def displaybanner():
     print("SockChat == SERVER")
 
-def handle_client(clientsocket):
-    while True:
-        data = clientsocket.recv(1024)
-        if not data:
-            break
-        print(pickle.loads(data))
-    print(f"Connection closed: {addr}")
-    clientsocket.close()
+clientlst = [] #list of current client sockets for broadcasting
+
+def handleClient(clientsocket):
+    try:
+        while True:
+            data = clientsocket.recv(1024)
+            if not data:
+                break
+            else:
+                print(pickle.loads(data)) #deserialize message and print it
+                for client in clientlst: #broadcast received message to all current client sockets
+                    client.sendall(data)
+    except (BrokenPipeError, ConnectionResetError):
+        print(f"Connection closed: {addr}")
+
+    finally:
+        clientlst.remove(clientsocket)
+        clientsocket.close()
 
 ### EXECUTION
 
@@ -33,6 +43,7 @@ serversocket.listen(10)
 while True:
     clientsocket, addr = serversocket.accept()
     print(f"Incoming connection: {addr}")
-    client_thread = threading.Thread(target=handle_client, args=(clientsocket,))
+    clientlst.append(clientsocket)
+    client_thread = threading.Thread(target=handleClient, args=(clientsocket,))
     client_thread.start()
 
