@@ -14,8 +14,8 @@ Close the program at any time to exit.
 
 **Client**: Execute *client.py*.
 When the program starts, you'll be asked to input a username, an IP, and a port.
-The IP should be the *public* IP address of the server. That is, the IP of the router.
-The port should be whatever port has been forwarded for the server.
+The IP should be the *public* IP address of the server. Alternatively, a local IP will work for a LAN connection if the server is running on the same network.
+The port should be whatever port has been forwarded for the server (or whichever port is being used, assuming a LAN connection).
 Assuming things were done correctly, you should now be connected to the server!
 Type "#exit" at any time to disconnect from the server and close the program.
 
