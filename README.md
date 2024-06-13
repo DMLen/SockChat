@@ -6,6 +6,6 @@ A very basic socket-based messenger written in Python. Operates off a server-cli
 In its current state, messages sent are not secured! Do not send important information via this program!
 
 TODO:
-Commands executed from server terminal (etc: forcefully disconnect clientsockets)
-Encryption mode
-Tkinter GUI
+1. Commands executed from server terminal (etc: forcefully disconnect clientsockets)
+2. Encryption mode
+3. Tkinter GUI
