@@ -50,7 +50,12 @@ def handleCommand(input): #handle commands entered by user, and if neccessary, s
         cmd = Command(idcounter, username, "handshake")
         cmd.addPayload( pickle.dumps(clientPubKey) )
         clientsocket.send(cmd.serialize())
-        print(f"Debug: Key {clientPubKey} sent to server! Pickled: {pickle.dumps(clientPubKey)}")
+        print(f"Debug: Client public key sent to server!")
+
+    elif command == "encryptiontest":
+        print("Prompting server to send an encrypted message...")
+        cmd = Command(idcounter, username, "encryptiontest")
+        clientsocket.send(cmd.serialize())
     
     else:
         print("Unknown command! Enter \"#help\" to see a list of commands!")
@@ -66,7 +71,7 @@ def handleResponse(input): #handle command responses from the server
     elif command == "handshakeresponse":
         global serverPubKey
         serverPubKey = pickle.loads(input.payload)
-        print(f"Debug: Public key received from server! Key: {serverPubKey}")
+        print(f"Debug: Server public key received!")
         global encryptionmode
         encryptionmode = True
         print(f"Debug: Encryption mode {encryptionmode}")
@@ -83,7 +88,8 @@ helpmsg = """Commands:
 #exit - Exits the program
 #ping - Pings the server
 #changename <name> - Changes your username (Will be broadcast to all users)
-#handshake - Initiates an RSA key exchange with the server and turns on message encryption"""
+#handshake - Initiates an RSA key exchange with the server and turns on message encryption
+#encryptiontest - Prompt the server to send an encrypted message. Requires handshake to be executed first"""
 
 def handleMessage(): #also handle receiving messages from the server
     while True:
@@ -95,6 +101,10 @@ def handleMessage(): #also handle receiving messages from the server
         if msg.cmd == True: #if the input data is a special response from the server, handle it appropriately
             handleResponse(msg)
         else:
+            if msg.encrypted == True:
+                print(f"Debug: Encrypted message received: {msg}")
+                msg.decrypt(clientPrivKey)
+                print(f"Debug: Decrypted message: {msg}")   
             print(f"> {msg}")
 
 clientPubKey, clientPrivKey = rsa.newkeys(1024)
@@ -133,7 +143,7 @@ while True:
         idcounter += 1
 
         if encryptionmode == True:
-            msg.encrypt(clientPubKey)
+            msg.encrypt(serverPubKey)
             msg.encrypted = True
             clientsocket.send(msg.serialize())
         

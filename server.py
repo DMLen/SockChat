@@ -39,9 +39,15 @@ def handleClient(clientsocket):
                 if msg.cmd == True:
                     handleUserCommand(msg, clientsocket) #handle user commands on the serverside
                 else:
+                    if msg.encrypted == True: #if the message is encrypted, decrypt it
+                        print(f"Debug: Encrypted message received: {msg}")
+                        msg.decrypt(serverPrivKey) #decrypt it with the server's priv key
+                        print(f"Debug: Decrypted message: {msg}")
+
+
                     print(f"> {addr} {msg}") #deserialize message and print it
                     for client in clientlst: #broadcast received message to all current client sockets
-                        client.sendall(data)
+                        client.sendall(msg.serialize())
     except (BrokenPipeError, ConnectionResetError):
         print(f"Connection closed: {addr}")
 
@@ -78,6 +84,12 @@ def handleUserCommand(input, clientsocket): #handle commands received from clien
         cmd = Command(0, "server", "handshakeresponse")
         cmd.addPayload(pickle.dumps(serverPubKey))
         clientsocket.send(cmd.serialize())
+
+    elif command == "encryptiontest": #send encrypted message to client
+        print(f"{addr} requested an encrypted message! Sending...")
+        msg = Message(0, "server <Private>", "This is an encrypted message! If you can read this, it appears to be working. Nobody else can see this message.")
+        msg.encrypt(keydict[clientsocket])
+        clientsocket.send(msg.serialize())
     
     else:
         print(f"Unknown command received from {addr}! This should never be displayed!")
