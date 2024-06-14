@@ -45,9 +45,19 @@ def handleClient(clientsocket):
                         print(f"Debug: Decrypted message: {msg}")
 
 
-                    print(f"> {addr} {msg}") #deserialize message and print it
-                    for client in clientlst: #broadcast received message to all current client sockets
-                        client.sendall(msg.serialize())
+                    print(f"> {addr} {msg}") #deserialize message and print it to local console
+                    
+                    #send message as broadcast to all current client sockets
+                    #make sure it is uniquely encrypted for each client!
+
+                    for client in clientlst:
+                        broadcast = Message(msg.id, msg.sender, msg.content)
+                        broadcast.timestamp = msg.timestamp
+                        broadcast.encrypt(keydict[client])
+                        client.sendall(broadcast.serialize())
+
+
+
     except (BrokenPipeError, ConnectionResetError):
         print(f"Connection closed: {addr}")
 

@@ -17,6 +17,12 @@ def changeUsername(new_username):
     global username
     username = new_username
 
+def keyExchange():
+    cmd = Command(idcounter, username, "handshake")
+    cmd.addPayload( pickle.dumps(clientPubKey) )
+    clientsocket.send(cmd.serialize())
+    print(f"Debug: Client public key sent to server!")
+
 def handleCommand(input): #handle commands entered by user, and if neccessary, send them to the server
     parts = input.replace("#", "").split(' ', 1)  # split input into command and arguments
     command = parts[0]
@@ -45,12 +51,6 @@ def handleCommand(input): #handle commands entered by user, and if neccessary, s
             clientsocket.send(cmd.serialize())
         else:
             print("Please provide a valid username.")
-
-    elif command == "handshake":
-        cmd = Command(idcounter, username, "handshake")
-        cmd.addPayload( pickle.dumps(clientPubKey) )
-        clientsocket.send(cmd.serialize())
-        print(f"Debug: Client public key sent to server!")
 
     elif command == "encryptiontest":
         print("Prompting server to send an encrypted message...")
@@ -88,8 +88,7 @@ helpmsg = """Commands:
 #exit - Exits the program
 #ping - Pings the server
 #changename <name> - Changes your username (Will be broadcast to all users)
-#handshake - Initiates an RSA key exchange with the server and turns on message encryption
-#encryptiontest - Prompt the server to send an encrypted message. Requires handshake to be executed first"""
+#encryptiontest - Prompt the server to send an encrypted message. Only you will receive the message."""
 
 def handleMessage(): #also handle receiving messages from the server
     while True:
@@ -108,7 +107,7 @@ def handleMessage(): #also handle receiving messages from the server
             print(f"> {msg}")
 
 clientPubKey, clientPrivKey = rsa.newkeys(1024)
-serverPubKey = None #public key of the server. will be received after the handshake command is executed
+serverPubKey = None #public key of the server. will be received after the handshake is completed.
 
 ### EXECUTION
 
@@ -131,6 +130,8 @@ clientsocket.connect((host, port))
 
 receive_thread = threading.Thread(target=handleMessage)
 receive_thread.start()
+
+keyExchange()
 
 print("Commands can be viewed by entering \"#help\"!\n")
 

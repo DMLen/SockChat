@@ -8,7 +8,7 @@ class Message():
         self.sender = sender
         self.content = content
         self.timestamp = datetime.now()
-        self.cmd = False 
+        self.cmd = False #flipped to true only for the command child class.
         self.encrypted = False
 
     def __str__(self):
