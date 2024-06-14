@@ -25,5 +25,5 @@ Type "#exit" at any time to disconnect from the server and close the program.
 
 TODO:
 1. Commands executed from server terminal (etc: forcefully disconnect clientsockets)
-~~2. Encryption mode~~ Program now uses RSA encryption
+2. ~~Encryption mode~~ Program now uses RSA encryption
 3. Tkinter GUI
