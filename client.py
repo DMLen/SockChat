@@ -10,7 +10,7 @@ def displaybanner():
     print("SockChat == CLIENT\n")
 
 pinger = PingTimer()
-encryptionmode = 0
+encryptionmode = False
 idcounter = 0
 
 def changeUsername(new_username):
@@ -50,7 +50,6 @@ def handleCommand(input): #handle commands entered by user, and if neccessary, s
         cmd = Command(idcounter, username, "handshake")
         cmd.addPayload( pickle.dumps(clientPubKey) )
         clientsocket.send(cmd.serialize())
-        encryptionmode = 1
         print(f"Debug: Key {clientPubKey} sent to server! Pickled: {pickle.dumps(clientPubKey)}")
     
     else:
@@ -68,6 +67,9 @@ def handleResponse(input): #handle command responses from the server
         global serverPubKey
         serverPubKey = pickle.loads(input.payload)
         print(f"Debug: Public key received from server! Key: {serverPubKey}")
+        global encryptionmode
+        encryptionmode = True
+        print(f"Debug: Encryption mode {encryptionmode}")
 
 
     else:
@@ -129,4 +131,11 @@ while True:
     else:
         msg = Message(idcounter, username, content)
         idcounter += 1
-        clientsocket.send(msg.serialize())
+
+        if encryptionmode == True:
+            msg.encrypt(clientPubKey)
+            msg.encrypted = True
+            clientsocket.send(msg.serialize())
+        
+        else:
+            clientsocket.send(msg.serialize())
