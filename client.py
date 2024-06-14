@@ -6,9 +6,14 @@ import socket
 import threading
 import rsa
 
-def displaybanner():
-    print("SockChat == CLIENT\n")
+### CONFIG VARIABLES ###
 
+debugmode = False #set to True if you like your console to be spammed with technical information
+
+### END CONFIG ###
+
+def displaybanner():
+    print("    SockChat == CLIENT\n")
 pinger = PingTimer()
 encryptionmode = False
 idcounter = 0
@@ -21,7 +26,8 @@ def keyExchange():
     cmd = Command(idcounter, username, "handshake")
     cmd.addPayload( pickle.dumps(clientPubKey) )
     clientsocket.send(cmd.serialize())
-    print(f"Debug: Client public key sent to server!")
+    if debugmode:
+        print(f"Debug: Client public key sent to server!")
 
 def handleCommand(input): #handle commands entered by user, and if neccessary, send them to the server
     parts = input.replace("#", "").split(' ', 1)  # split input into command and arguments
@@ -71,10 +77,12 @@ def handleResponse(input): #handle command responses from the server
     elif command == "handshakeresponse":
         global serverPubKey
         serverPubKey = pickle.loads(input.payload)
-        print(f"Debug: Server public key received!")
+        if debugmode:
+            print(f"Debug: Server public key received!")
         global encryptionmode
         encryptionmode = True
-        print(f"Debug: Encryption mode {encryptionmode}")
+        if debugmode:
+            print(f"Debug: Encryption mode {encryptionmode}")
 
 
     else:
@@ -101,9 +109,11 @@ def handleMessage(): #also handle receiving messages from the server
             handleResponse(msg)
         else:
             if msg.encrypted == True:
-                print(f"Debug: Encrypted message received: {msg}")
+                if debugmode:
+                    print(f"Debug: Encrypted message received: {msg}")
                 msg.decrypt(clientPrivKey)
-                print(f"Debug: Decrypted message: {msg}")   
+                if debugmode:
+                    print(f"Debug: Decrypted message: {msg}")   
             print(f"> {msg}")
 
 clientPubKey, clientPrivKey = rsa.newkeys(1024)

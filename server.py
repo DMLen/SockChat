@@ -4,11 +4,14 @@ import pickle
 import socket
 import threading
 import rsa
+import logging
+logger = logging.getLogger(__name__)
 
 ### CONFIG VARIABLES ###
 
 host = 'localhost' #192.168.0.200
-port = 5000   
+port = 5000
+debugmode = True #set to True if you like your console to be spammed with technical information
 
 #portforwarding note: for port forwarding, the host ip should be the ip of the device running this code.
 #make sure you have a port forwarding rule set up on the router to forward the port to this device!
@@ -40,9 +43,11 @@ def handleClient(clientsocket):
                     handleUserCommand(msg, clientsocket) #handle user commands on the serverside
                 else:
                     if msg.encrypted == True: #if the message is encrypted, decrypt it
-                        print(f"Debug: Encrypted message received: {msg}")
+                        if debugmode:
+                            print(f"Debug: Encrypted message received: {msg}")
                         msg.decrypt(serverPrivKey) #decrypt it with the server's priv key
-                        print(f"Debug: Decrypted message: {msg}")
+                        if debugmode:
+                            print(f"Debug: Decrypted message: {msg}")
 
 
                     print(f"> {addr} {msg}") #deserialize message and print it to local console
@@ -87,9 +92,11 @@ def handleUserCommand(input, clientsocket): #handle commands received from clien
 
     elif command == "handshake": #receive public key from client and store it in keydict
         clientPubKey = pickle.loads(input.payload)
-        print(f"Debug: Key {clientPubKey} received from client!")
+        if debugmode:
+            print(f"Debug: Key {clientPubKey} received from client!")
         keydict[clientsocket] = clientPubKey
-        print(f"Debug: Keydict: {keydict}")
+        if debugmode:
+            print(f"Debug: Keydict: {keydict}")
 
         cmd = Command(0, "server", "handshakeresponse")
         cmd.addPayload(pickle.dumps(serverPubKey))
