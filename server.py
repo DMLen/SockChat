@@ -3,10 +3,11 @@ from command import Command
 import pickle
 import socket
 import threading
+import rsa
 
 ### CONFIG VARIABLES ###
 
-host = '192.168.0.200'
+host = 'localhost' #192.168.0.200
 port = 5000   
 
 #portforwarding note: for port forwarding, the host ip should be the ip of the device running this code.
@@ -21,8 +22,11 @@ Running on host: {host}
 Running on port: {port}\n"""
     print(banner)
 
+serverPubKey, serverPrivKey = rsa.newkeys(1024)
 
 clientlst = [] #list of current client sockets for broadcasting
+
+keydict = {} #dictionary to store public keys of clients
 
 def handleClient(clientsocket):
     try:
@@ -33,7 +37,7 @@ def handleClient(clientsocket):
             else:
                 msg = pickle.loads(data)
                 if msg.cmd == True:
-                    handleUserCommand(msg.content, clientsocket) #handle user commands on the serverside
+                    handleUserCommand(msg, clientsocket) #handle user commands on the serverside
                 else:
                     print(f"> {addr} {msg}") #deserialize message and print it
                     for client in clientlst: #broadcast received message to all current client sockets
@@ -49,7 +53,7 @@ def handleClient(clientsocket):
         clientsocket.close()
 
 def handleUserCommand(input, clientsocket): #handle commands received from clients
-    parts = input.replace("#", "").split(' ', 1)  # split input into command and arguments
+    parts = input.content.replace("#", "").split(' ', 1)  # split input into command and arguments
     command = parts[0]
     args = parts[1] if len(parts) > 1 else None  # if there are arguments, assign them to args
 
@@ -64,9 +68,19 @@ def handleUserCommand(input, clientsocket): #handle commands received from clien
         msg = Message(0, "server", f"{oldname} has changed their username to {newname}")
         for client in clientlst:
             client.send(msg.serialize())
+
+    elif command == "handshake": #receive public key from client and store it in keydict
+        clientPubKey = pickle.loads(input.payload)
+        print(f"Debug: Key {clientPubKey} received from client!")
+        keydict[clientsocket] = clientPubKey
+        print(f"Debug: Keydict: {keydict}")
+
+        cmd = Command(0, "server", "handshakeresponse")
+        cmd.addPayload(pickle.dumps(serverPubKey))
+        clientsocket.send(cmd.serialize())
     
     else:
-        print(f"Unknown command received from {clientsocket}! This should never be displayed!")
+        print(f"Unknown command received from {addr}! This should never be displayed!")
 
 ### EXECUTION
 

@@ -4,12 +4,14 @@ from pingtimer import PingTimer
 import pickle
 import socket
 import threading
-import time
+import rsa
 
 def displaybanner():
     print("SockChat == CLIENT\n")
 
 pinger = PingTimer()
+encryptionmode = 0
+idcounter = 0
 
 def changeUsername(new_username):
     global username
@@ -19,6 +21,8 @@ def handleCommand(input): #handle commands entered by user, and if neccessary, s
     parts = input.replace("#", "").split(' ', 1)  # split input into command and arguments
     command = parts[0]
     args = parts[1] if len(parts) > 1 else None  # if there are arguments, assign them to args
+    global idcounter
+    idcounter += 1
 
     if command == "exit":
         clientsocket.close()
@@ -41,17 +45,33 @@ def handleCommand(input): #handle commands entered by user, and if neccessary, s
             clientsocket.send(cmd.serialize())
         else:
             print("Please provide a valid username.")
+
+    elif command == "handshake":
+        cmd = Command(idcounter, username, "handshake")
+        cmd.addPayload( pickle.dumps(clientPubKey) )
+        clientsocket.send(cmd.serialize())
+        encryptionmode = 1
+        print(f"Debug: Key {clientPubKey} sent to server! Pickled: {pickle.dumps(clientPubKey)}")
     
     else:
         print("Unknown command! Enter \"#help\" to see a list of commands!")
 
 def handleResponse(input): #handle command responses from the server
-    command = input.replace("#", "")
+    command = input.content.replace("#", "")
 
     if command == "pong":
         pinger.stop()
         print("Pong! Response received from server!")
         print(f"Elapsed time: {pinger.get()} ms")
+
+    elif command == "handshakeresponse":
+        global serverPubKey
+        serverPubKey = pickle.loads(input.payload)
+        print(f"Debug: Public key received from server! Key: {serverPubKey}")
+
+
+    else:
+        print(f"Unknown command received from server! This should never be displayed! Command: {command}")
 
 
 
@@ -60,7 +80,8 @@ helpmsg = """Commands:
 #help - Displays this message
 #exit - Exits the program
 #ping - Pings the server
-#changename <name> - Changes your username (Will be broadcast to all users)"""
+#changename <name> - Changes your username (Will be broadcast to all users)
+#handshake - Initiates an RSA key exchange with the server and turns on message encryption"""
 
 def handleMessage(): #also handle receiving messages from the server
     while True:
@@ -70,9 +91,12 @@ def handleMessage(): #also handle receiving messages from the server
         msg = pickle.loads(data)
 
         if msg.cmd == True: #if the input data is a special response from the server, handle it appropriately
-            handleResponse(msg.content)
+            handleResponse(msg)
         else:
             print(f"> {msg}")
+
+clientPubKey, clientPrivKey = rsa.newkeys(1024)
+serverPubKey = None #public key of the server. will be received after the handshake command is executed
 
 ### EXECUTION
 
@@ -92,7 +116,6 @@ print("\n")
 
 clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 clientsocket.connect((host, port))
-idcounter = 0
 
 receive_thread = threading.Thread(target=handleMessage)
 receive_thread.start()

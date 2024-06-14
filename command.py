@@ -7,3 +7,8 @@ class Command(Message):
     def __init__(self, id, sender, content):
         super().__init__(id, sender, content)
         self.cmd = True
+        self.payload = None
+
+    def addPayload(self, obj):
+        self.payload = obj
+    
