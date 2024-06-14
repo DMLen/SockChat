@@ -4,6 +4,7 @@
 A basic socket-based messenger written in Python. Operates off a server-client chatroom model, where multiple clients can connect to one server and all can see messages that are posted. Supports some basic commands, the prefix for which is the hash key (#). Enter "#help" to view some commands!
 
 ~~In its current state, messages sent are not secured! Do not send important information via this program!~~
+
 SockChat now has RSA encryption. After an exchange of public keys between the client and server upon initial connection, all messages sent and received are encrypted. I would consider the implementation to be secure , but I still wouldn't send anything confidential over this.
 
 
