@@ -6,7 +6,7 @@ import threading
 
 ### CONFIG VARIABLES ###
 
-host = 'localhost'
+host = '192.168.0.200'
 port = 5000   
 
 #portforwarding note: for port forwarding, the host ip should be the ip of the device running this code.
@@ -40,6 +40,9 @@ def handleClient(clientsocket):
                         client.sendall(data)
     except (BrokenPipeError, ConnectionResetError):
         print(f"Connection closed: {addr}")
+
+    except Exception as err: #try catch general other errors, such as deserialization error or receiving misformatted data
+        print(f"An error occurred: {err}")
 
     finally:
         clientlst.remove(clientsocket)
