@@ -9,6 +9,10 @@ SockChat now has RSA encryption. After an exchange of public keys between the cl
 
 
 ## How to Run?
+First, install the RSA library. This is used for encryption.
+
+pip install rsa
+
 **Server**: Edit *server.py* in an editor to view configurable options (currently the IP, port, and debugmode). 
 For testing purposes, "localhost" for the IP is fine. Otherwise the IP should be the local IP of your device, and a port forwarding rule should be defined your router that points to your device!
 For port, any value is fine. I recommend leaving it at 5000.
