@@ -7,7 +7,7 @@ import rsa
 
 ### CONFIG VARIABLES ###
 
-host = 'localhost' #192.168.0.200
+host = 'localhost'
 port = 5000
 debugmode = True #set to True if you like your console to be spammed with technical information
 
