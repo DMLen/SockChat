@@ -4,8 +4,6 @@ import pickle
 import socket
 import threading
 import rsa
-import logging
-logger = logging.getLogger(__name__)
 
 ### CONFIG VARIABLES ###
 
