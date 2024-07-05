@@ -14,15 +14,15 @@ First, install the RSA library. This is used for encryption.
 pip install rsa
 
 **Server**: Edit *server.py* in an editor to view configurable options (currently the IP, port, and debugmode). 
-For testing purposes, "localhost" for the IP is fine. Otherwise the IP should be the local IP of your device, and a port forwarding rule should be defined your router that points to your device!
+For testing purposes, "localhost" for the IP is fine. Otherwise the IP should be the local IP of your device, and a port forwarding rule should be defined on your router that points to your device!
 For port, any value is fine. I recommend leaving it at 5000.
 When done, execute the file to start the server. 
 Close the program at any time to exit.
 
 **Client**: Execute *client.py*.
-Edit *server.py* in an editor to view configurable options (currently just debugmode)
+You may edit *client.py* in an editor to view configurable options (currently just debugmode)
 When the program starts, you'll be asked to input a username, an IP, and a port.
-The IP should be the *public* IP address of the server. Alternatively, a local IP will work for a LAN connection if the server is running on the same network.
+The IP should be the *public-facing* IP address of the server (the one of the router, usually). Alternatively, a local IP will work for a LAN connection if the server is running on the same network. Localhost will work if the server is on the same device.
 The port should be whatever port has been forwarded for the server (or whichever port is being used, assuming a LAN connection).
 Assuming things were done correctly, you should now be connected to the server!
 Type "#exit" at any time to disconnect from the server and close the program.
